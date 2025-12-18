@@ -3,3 +3,4 @@ local-chef-firebase-adminsdk.json
 node_modules/
 *.log
 convertPayments.js
+.vercel

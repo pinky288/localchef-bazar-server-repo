@@ -19,7 +19,7 @@ admin.initializeApp({
 console.log("Firebase Admin initialized successfully!");
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000
 let usersCollection;
 let requestCollection;
 
@@ -517,4 +517,4 @@ run().catch(console.dir);
 app.get('/', (req, res) => res.send('Server is Running!'));
 app.get('/hello', (req, res) => res.send('How are you?'));
 
-app.listen(port, () => console.log(`Server is listening on port ${port}`));
+module.exports = app;
