@@ -7,6 +7,7 @@ const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const stripe = require('stripe')(process.env.stripe_secret);
 const { MongoClient, ObjectId, ServerApiVersion } = require('mongodb');
+const serverless = require("serverless-http");
 
 
 // const serviceAccount = require("./firebase-admin-key.json");
@@ -19,7 +20,12 @@ admin.initializeApp({
 console.log("Firebase Admin initialized successfully!");
 
 const app = express();
-const port = process.env.PORT || 3000
+if (process.env.NODE_ENV !== "production") {
+  const port = process.env.PORT || 3000;
+  app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+  });
+}
 let usersCollection;
 let requestCollection;
 
@@ -171,6 +177,7 @@ const client = new MongoClient(uri, {
 });
 
 let db;
+let mealsCollection;
 
 async function run() {
   try {
@@ -178,7 +185,7 @@ async function run() {
     console.log("Connected to MongoDB!");
 
      db = client.db("localchef-db")
-    const mealsCollection = db.collection("meals");
+    mealsCollection = db.collection("meals");
     const chefsCollection = db.collection("chefs");
     const categoriesCollection = db.collection("categories");
     const reviewsCollection = db.collection("reviews");
@@ -342,9 +349,14 @@ app.post("/payments", async (req, res) => {
     });
 
     app.get('/meals', async (req, res) => {
-      try { const meals = await mealsCollection.find().toArray(); res.send(meals); }
-      catch (err) { res.status(500).send({ message: 'Failed to fetch meals' }); }
-    });
+  if (!mealsCollection) return res.status(503).send({ message: 'DB not ready' });
+  try {
+    const meals = await mealsCollection.find().toArray();
+    res.send(meals);
+  } catch (err) {
+    res.status(500).send({ message: 'Failed to fetch meals' });
+  }
+});
 
     app.get('/meals/:id', async (req, res) => {
       try {
@@ -518,3 +530,5 @@ app.get('/', (req, res) => res.send('Server is Running!'));
 app.get('/hello', (req, res) => res.send('How are you?'));
 
 module.exports = app;
+module.exports.handler = serverless(app);
+
