@@ -7,7 +7,6 @@ const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const stripe = require('stripe')(process.env.stripe_secret);
 const { MongoClient, ObjectId, ServerApiVersion } = require('mongodb');
-const serverless = require("serverless-http");
 
 
 // const serviceAccount = require("./firebase-admin-key.json");
@@ -20,12 +19,8 @@ admin.initializeApp({
 console.log("Firebase Admin initialized successfully!");
 
 const app = express();
-if (process.env.NODE_ENV !== "production") {
-  const port = process.env.PORT || 3000;
-  app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-  });
-}
+
+
 let usersCollection;
 let requestCollection;
 
@@ -529,6 +524,8 @@ run().catch(console.dir);
 app.get('/', (req, res) => res.send('Server is Running!'));
 app.get('/hello', (req, res) => res.send('How are you?'));
 
-module.exports = app;
-module.exports.handler = serverless(app);
+const PORT = process.env.PORT || 3000;
 
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
